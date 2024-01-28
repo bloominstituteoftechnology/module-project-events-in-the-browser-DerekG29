@@ -37,10 +37,10 @@ function moduleProject2() {
       row.appendChild(square)
       square.addEventListener('click', (e) => {
         // 👉 TASK 2 - Use a click handler to target a square 👈
-        getAllSquares().forEach(square => {
-          square.classList.remove('targeted');
-        })
-        e.currentTarget.classList.add('targeted');
+        if (!square.classList.contains('targeted')) {
+          document.querySelector('.targeted').classList.remove('targeted');
+          square.classList.add('targeted');
+        }
       })
     }
   }
@@ -67,35 +67,43 @@ function moduleProject2() {
     allSquares[randomInt].appendChild(mosquito)
   })
 
+  let gameOver = false;
+
   document.addEventListener('keydown', e => {
 
     // 👉 TASK 3 - Use the arrow keys to highlight a new square 👈
-
-    let current = document.querySelector('div.targeted');
     
-    if (e.key === keys.up) {
+    let isUp = e.key === keys.up;
+    let isDown = e.key === keys.down;
+    let isRight = e.key === keys.right;
+    let isLeft = e.key === keys.left;
+    let isSpace = e.key === keys.space;
+    
+    let current = document.querySelector('div.targeted');
+
+    if (isUp) {
       let parent = current.parentNode;
-      let index = Array.prototype.indexOf.call(parent.children, current);
       if (parent.previousElementSibling) {
+        let index = Array.from(parent.children).indexOf(current);
         current.classList.remove('targeted');
         parent.previousSibling.childNodes[index].classList.add('targeted');
       }
     } else
-    if (e.key === keys.down) {
+    if (isDown) {
       let parent = current.parentNode;
-      let index = Array.prototype.indexOf.call(parent.children, current);
       if (parent.nextElementSibling) {
+        let index = Array.from(parent.children).indexOf(current);
         current.classList.remove('targeted');
         parent.nextSibling.childNodes[index].classList.add('targeted');
       }
     } else
-    if (e.key === keys.right) {
+    if (isRight) {
       if (current.nextElementSibling) {
         current.classList.remove('targeted');
         current.nextElementSibling.classList.add('targeted');
       }
     } else
-    if (e.key === keys.left) {
+    if (isLeft) {
       if (current.previousElementSibling) {
         current.classList.remove('targeted');
         current.previousElementSibling.classList.add('targeted');
@@ -104,28 +112,32 @@ function moduleProject2() {
     
     // 👉 TASK 4 - Use the space bar to exterminate a mosquito 👈
     
-    if (e.key === keys.space) {
-      let mosquitoes = document.querySelectorAll('img');
-      if (current.firstChild) {
-        current.firstChild.dataset.status = 'dead';
+    if (isSpace) {
+      let mosquito = current.firstChild;
+      if (mosquito && mosquito.dataset.status === 'alive') {
+        mosquito.dataset.status = 'dead';
         current.style.backgroundColor = 'red';
       }
-      
-      // 👉 TASK 5 - End the game 👈
 
-      if (Array.from(mosquitoes)
-      .every(elem => elem.dataset.status === 'dead')) {
-        
-        document.querySelector('h2').innerHTML =
-        `Mosquito Exterminator <button>Restart</button>`;
-        let restart = document.querySelector('button');
-        restart.addEventListener('click', () => location.reload());
-        
-        let time = getTimeElapsed() / 1000;
-        document.querySelector('p.info').textContent =
-        `Extermination completed in ${time} seconds!`;
+      // 👉 TASK 5 - End the game 👈
+      
+      let liveMosquitos = document.querySelectorAll('[data-status=alive]');
+
+      if (!liveMosquitos.length) {
+        if(!gameOver) {
+          let time = getTimeElapsed();
+          document.querySelector('p.info').textContent =
+          `Extermination completed in ${time / 1000} seconds!`;
+          
+          let restart = document.createElement('button');
+          restart.textContent = 'Restart';
+          restart.addEventListener('click', () => location.reload());
+          document.querySelector('h2').insertAdjacentElement('beforeend', restart);
+          restart.focus();
+        }
+        gameOver = true;
       }
-    }
+    } 
   })
   // 👆 WORK WORK ABOVE THIS LINE 👆
 }
